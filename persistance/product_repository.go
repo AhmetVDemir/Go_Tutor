@@ -16,6 +16,13 @@ type ProductRepository struct {
 	dbPool *pgxpool.Pool
 }
 
+// Go newletemez elle new çağrısı yaptık
+func NewProductRepository(dbPool *pgxpool.Pool) IProductRepository {
+	return &ProductRepository{
+		dbPool: dbPool,
+	}
+}
+
 func (productRepository *ProductRepository) GetAllProducts() []domain.Product {
 
 	ctx := context.Background()
