@@ -45,6 +45,9 @@ func setup(ctx context.Context, dbPool *pgxpool.Pool) {
 func clear(ctx context.Context, dbPool *pgxpool.Pool) {
 	TruncateTestData(ctx, dbPool)
 }
+
+//-------------------------------------------------------------------------------------------------
+
 func TestGetAllProduct(t *testing.T) {
 	setup(ctx, dbPool)
 
@@ -143,6 +146,51 @@ func TestAddProduct(t *testing.T) {
 		actualProdutcs := productRepository.GetAllProducts()
 		assert.Equal(t, 1, len(actualProdutcs))
 		assert.Equal(t, expectedProducts, actualProdutcs)
+	})
+	clear(ctx, dbPool)
+}
+
+func TestGetProductById(t *testing.T) {
+
+	setup(ctx, dbPool)
+
+	t.Run("GetProductById", func(t *testing.T) {
+		actualProduct, _ := productRepository.GetProductById(1)
+		_, err := productRepository.GetProductById(6)
+		assert.Equal(t, domain.Product{
+			Id:       1,
+			Name:     "AirFryer",
+			Price:    3000.0,
+			Discount: 22.0,
+			Store:    "ABC TECH",
+		}, actualProduct)
+		assert.Equal(t, "Id ye göre ürün getirilirken hata ile karşılaşıldı : 6 ", err.Error())
+
+	})
+	clear(ctx, dbPool)
+
+}
+
+func TestDeleteById(t *testing.T) {
+	setup(ctx, dbPool)
+	t.Run("DeleteById", func(t *testing.T) {
+		productRepository.DeleteById(1)
+		products := productRepository.GetAllProducts()
+		assert.Equal(t, 3, len(products))
+	})
+	clear(ctx, dbPool)
+}
+
+func TestUpdatePrice(t *testing.T) {
+	setup(ctx, dbPool)
+
+	t.Run("UpdatePrice", func(t *testing.T) {
+		productBeforeUpdate, _ := productRepository.GetProductById(1)
+		assert.Equal(t, float32(3000.0), productBeforeUpdate.Price)
+		productRepository.UpdatePrice(1, 4000.0)
+		productAfterUpdate, _ := productRepository.GetProductById(1)
+		assert.Equal(t, float32(4000.0), productAfterUpdate.Price)
+
 	})
 	clear(ctx, dbPool)
 }
